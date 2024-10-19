@@ -6,6 +6,10 @@ from rest_framework_simplejwt.views import (
 )
 
 urlpatterns = [
+    #Rutas para usuarios
+    path('registrar/', views.UsuarioListCreateView.as_view(), name='registrar'),
+    path('usuarios/', views.UsuarioListCreateView.as_view(), name='usuarios'),
+    
     # Rutas para libros
     path('libros/', views.LibroListCreate.as_view(), name='libro-list-create'),
     path('libros/<int:pk>/', views.LibroDetail.as_view(), name='libro-detail'),

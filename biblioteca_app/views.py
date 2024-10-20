@@ -1,9 +1,42 @@
 from rest_framework import generics
+from django.contrib.auth import get_user_model
+from rest_framework.response import Response
 from biblioteca_app.models import Libro, Prestamo, Reserva, Valoracion
-from biblioteca_app.serializers import LibroSerializer, PrestamoSerializer, ReservaSerializer, ValoracionSerializer
-from rest_framework.permissions import IsAuthenticated
+from biblioteca_app.serializers import CustomUserSerializer, LibroSerializer, PrestamoSerializer, ReservaSerializer, ValoracionSerializer
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .permissions import EsBibliotecario, EsEstudianteOProfesor, EsDuenno
+from rest_framework import status
 
+User = get_user_model()
+
+class UsuarioListCreateView(generics.ListCreateAPIView):
+    queryset = User.objects.all()
+    serializer_class = CustomUserSerializer
+    
+    def get_permissions(self):
+        if self.request.method == 'POST':
+            return [AllowAny()]
+        if self.request.method == 'GET':
+            return [IsAuthenticated(), EsBibliotecario()]
+        return super().get_permissions()
+
+    def create(self, request, *args, **kwargs):
+        username = request.data.get("username")
+        password = request.data.get("password")
+        email = request.data.get("email")
+        role = request.data.get("role")
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "Nombre de usuario ya existe"}, status=status.HTTP_400_BAD_REQUEST)
+        if User.objects.filter(email=email).exists():
+            return Response({"error": "Correo electrónico ya existe"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if username and password and email and role:
+            user = User.objects.create_user(username=username, password=password, email=email, role=role)
+            return Response({"message": "Usuario creado exitosamente"}, status=status.HTTP_201_CREATED)
+
+        return Response({"error": "Faltan datos"}, status=status.HTTP_400_BAD_REQUEST)
+    
 #CRUD PARA LIBRO
 class LibroListCreate(generics.ListCreateAPIView):
     queryset = Libro.objects.all()

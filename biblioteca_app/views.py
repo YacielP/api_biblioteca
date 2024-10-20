@@ -6,7 +6,7 @@ from biblioteca_app.serializers import CustomUserSerializer, LibroSerializer, Pr
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from .permissions import EsBibliotecario, EsEstudianteOProfesor, EsDuenno
 from rest_framework import status
-from biblioteca_app.filters import LibroFilter
+from biblioteca_app.filters import LibroFilter, ReservaFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 User = get_user_model()
@@ -93,12 +93,14 @@ class PrestamoDetail(generics.RetrieveUpdateDestroyAPIView):
 class ReservaListCreate(generics.ListCreateAPIView):
     queryset = Reserva.objects.all()
     serializer_class = ReservaSerializer
+    filter_backends = [DjangoFilterBackend]
+    filterset_class = ReservaFilter
     
     def get_permissions(self):
         if self.request.method == 'POST':
             # Solo estudiantes y profesores pueden crear reservas
             return [IsAuthenticated(), EsEstudianteOProfesor()]
-        # Todos los usuarios autenticados pueden ver la lista de prestamos
+        # Todos los usuarios autenticados pueden ver la lista de reservas
         return [IsAuthenticated()]
 
 class ReservaDetail(generics.RetrieveUpdateDestroyAPIView):

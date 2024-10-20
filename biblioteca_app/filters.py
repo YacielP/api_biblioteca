@@ -1,5 +1,5 @@
 import django_filters
-from biblioteca_app.models import Libro, Reserva
+from biblioteca_app.models import Libro, Reserva, Prestamo
 
 class LibroFilter(django_filters.FilterSet):
     titulo = django_filters.CharFilter(lookup_expr='icontains')
@@ -17,3 +17,10 @@ class ReservaFilter(django_filters.FilterSet):
     class Meta:
         model = Reserva
         fields = ['estado', 'user']
+
+class PrestamoFilter(django_filters.FilterSet):
+    user = django_filters.CharFilter(field_name='user__username', lookup_expr='icontains')
+
+    class Meta:
+        model = Prestamo
+        fields = ['user']

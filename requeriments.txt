@@ -4,3 +4,4 @@ django
 httpie
 pytest
 pytest-django
+django-filter

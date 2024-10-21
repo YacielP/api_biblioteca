@@ -3,6 +3,7 @@ from biblioteca_app.models import Libro, Prestamo, Reserva, Valoracion
 from biblioteca_app.serializers import LibroSerializer, PrestamoSerializer, ReservaSerializer, ValoracionSerializer
 from rest_framework.permissions import IsAuthenticated
 from .permissions import EsBibliotecario, EsEstudianteOProfesor, EsDuenno
+from notificaciones.utils import enviar_correo_prestamo, enviar_correo_devolucion, enviar_correo_reserva
 
 #CRUD PARA LIBRO
 class LibroListCreate(generics.ListCreateAPIView):
@@ -39,6 +40,10 @@ class PrestamoListCreate(generics.ListCreateAPIView):
             return [IsAuthenticated(), EsEstudianteOProfesor()]
         # Todos los usuarios autenticados pueden ver la lista de prestamos
         return [IsAuthenticated()]
+    
+    def perform_create(self, serializer):
+        prestamo = serializer.save(user=self.request.user)
+        enviar_correo_prestamo(prestamo.user, prestamo.libro)
 
 class PrestamoDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Prestamo.objects.all()
@@ -63,6 +68,10 @@ class ReservaListCreate(generics.ListCreateAPIView):
             return [IsAuthenticated(), EsEstudianteOProfesor()]
         # Todos los usuarios autenticados pueden ver la lista de prestamos
         return [IsAuthenticated()]
+    
+    def perform_create(self, serializer):
+        reserva = serializer.save(user=self.request.user)
+        enviar_correo_reserva(reserva.user, reserva.libro)
 
 class ReservaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Reserva.objects.all()

@@ -5,3 +5,4 @@ httpie
 pytest
 pytest-django
 django-filter
+python-decouple

@@ -8,6 +8,7 @@ from .permissions import EsBibliotecario, EsEstudianteOProfesor, EsDuenno
 from rest_framework import status
 from biblioteca_app.filters import LibroFilter, ReservaFilter, PrestamoFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from notificaciones.utils import enviar_correo_prestamo, enviar_correo_reserva
 
 User = get_user_model()
 
@@ -78,6 +79,10 @@ class PrestamoListCreate(generics.ListCreateAPIView):
             return [IsAuthenticated(), EsEstudianteOProfesor()]
         # Todos los usuarios autenticados pueden ver la lista de prestamos
         return [IsAuthenticated()]
+    
+    def perform_create(self, serializer):
+        prestamo = serializer.save(user=self.request.user)
+        enviar_correo_prestamo(prestamo.user, prestamo.libro)
 
 class PrestamoDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Prestamo.objects.all()
@@ -104,6 +109,10 @@ class ReservaListCreate(generics.ListCreateAPIView):
             return [IsAuthenticated(), EsEstudianteOProfesor()]
         # Todos los usuarios autenticados pueden ver la lista de reservas
         return [IsAuthenticated()]
+    
+    def perform_create(self, serializer):
+        reserva = serializer.save(user=self.request.user)
+        enviar_correo_prestamo(reserva.user, reserva.libro)
 
 class ReservaDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Reserva.objects.all()
